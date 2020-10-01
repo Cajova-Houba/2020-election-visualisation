@@ -26,26 +26,29 @@ function initPartySelection(elemId) {
 function handleCheckboxChange(checkbox) {
     const party = checkbox.value;
 
-    if (checkbox.checked) {
-        if (!allowedParties.includes(party)) {
-            allowedParties.push(party);
-        }
-    } else {
-        if (allowedParties.includes(party)) {
-            const index = allowedParties.indexOf(party);
-            if (index > -1) {
-                allowedParties.splice(index, 1);
-            }
-        }
-    }
+    updateFilter(party, checkbox.checked)
 
     reloadVectorLayer();
+}
+
+function updateFilter(party, allow) {
+    if (allow) {
+        if (!allowedParties.includes(party)) {
+            allowedParties.push(party);
+        }  
+    } else {
+        const index = allowedParties.indexOf(party);
+        if (index > -1) {
+            allowedParties.splice(index, 1);
+        }   
+    }
 }
 
 function selectParties(selectState) {
     elems = document.getElementsByClassName(partyCheckboxClass);
     for (var i = 0; i < elems.length; i++) {
         elems[i].checked = selectState;
+        updateFilter(elems[i].value, selectState)
     }
 
     reloadVectorLayer();

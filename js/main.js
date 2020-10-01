@@ -1,3 +1,7 @@
+/**
+ * Only map related scripts here.
+ */
+
 const newPoint = function(latLon, mul) {
     return new ol.geom.Point(ol.proj.transform([
         latLon[1],
@@ -10,12 +14,20 @@ const partyFilter = function(party) {
     // return "BEZPP ".localeCompare(party) == 0
 
     // use only SPD and KSČM
-    return "SPD".localeCompare(party) != 0 && "KSČM".localeCompare(party) != 0;
+    var filterVal = true;
+    allowedParties.forEach(allowedParty => {
+      filterVal &= allowedParty.localeCompare(party) != 0;
+    });
+
+    return filterVal;
 }
 
 var clusterFeatures = new Array(0);
 
-for (var city in cityPartyCount) {
+function reLoadFeatures() {
+  clusterFeatures.length = 0;
+
+  for (var city in cityPartyCount) {
     var i = 0;
     var maxParty = "";
     var maxPartyCount = -1;
@@ -38,7 +50,10 @@ for (var city in cityPartyCount) {
             size: maxPartyCount
         }));
     }
+  }
 }
+reLoadFeatures();
+
 
 var clusterVectorSource = new ol.source.Vector({
     features: clusterFeatures,
@@ -89,4 +104,17 @@ var map = new ol.Map({
       center: ol.proj.fromLonLat([14.0381357,50.6603327]),
       zoom: 10
     })
+});
+
+function reloadVectorLayer() {
+  reLoadFeatures();
+  var clusterVectorSource = new ol.source.Vector({
+    features: clusterFeatures,
   });
+
+  var clusterSource = new ol.source.Cluster({
+      source: clusterVectorSource,
+  });
+
+  clusterLayer.setSource(clusterSource);
+}
